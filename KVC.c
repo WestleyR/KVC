@@ -42,23 +42,56 @@ int KVDestroy(KVDict* dict) {
   }
 
   free(dict->slice);
+  dict->len = 0;
   free(dict);
 
   return 0;
 }
 
+int indexForKey(KVDict* dict, const char* key) {
+  if (dict == NULL) return -1;
+
+  for (int i = 0; i < dict->len; i++) {
+    if (strcmp(dict->slice[i]->key, key) == 0) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+char* KVValueForKey(KVDict* dict, const char* key) {
+  if (dict == NULL) return NULL;
+
+  int index = indexForKey(dict, key);
+  if (index != -1) {
+    // It exists
+    return dict->slice[index]->value;
+  }
+
+  return NULL;
+}
+
 int KVSetKeyValue(KVDict* dict, const char* key, const char* value) {
   if (dict == NULL) return -1;
 
-	dict->slice = (KVDictSlice**) realloc(dict->slice, sizeof(KVDictSlice*) * dict->len + 1);
-  dict->slice[dict->len] = (KVDictSlice*) malloc(sizeof(KVDictSlice));
-
-  dict->slice[dict->len]->key = (char*) malloc(sizeof(char) * strlen(key) + 2);
-  dict->slice[dict->len]->value = (char*) malloc(sizeof(char) * strlen(value) + 2);
-
-  strcpy(dict->slice[dict->len]->key, key);
-  strcpy(dict->slice[dict->len]->value, value);
-  dict->len++;
+  // First, check if the key already exists. If so, just modify it. Otherwise create a new slice.
+  int index = indexForKey(dict, key);
+  if (index != -1) {
+    // Already exists
+    dict->slice[index]->value = realloc(dict->slice[index]->value, strlen(value) + 2);
+    strcpy(dict->slice[index]->value, value);
+  } else {
+    dict->slice = (KVDictSlice**) realloc(dict->slice, sizeof(KVDictSlice*) * dict->len + 1);
+    dict->slice[dict->len] = (KVDictSlice*) malloc(sizeof(KVDictSlice));
+    
+    dict->slice[dict->len]->key = (char*) malloc(sizeof(char) * strlen(key) + 2);
+    dict->slice[dict->len]->value = (char*) malloc(sizeof(char) * strlen(value) + 2);
+    
+    strcpy(dict->slice[dict->len]->key, key);
+    strcpy(dict->slice[dict->len]->value, value);
+    dict->len++;
+  }
 
   return 0;
 }

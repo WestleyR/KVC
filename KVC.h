@@ -21,11 +21,18 @@
 typedef struct KVDictSlice KVDictSlice;
 typedef struct KVDict KVDict;
 
+
 // Creation/cleanups
 KVDict* KVCreate();
 int KVDestroy(KVDict* dict);
 
-// Adding
+
+// Viewing
+char* KVValueForKey(KVDict* dict, const char* key);
+
+
+// KVSetKeyValue will set a key string for a value. Will create the
+// value if it does not exist.
 int KVSetKeyValue(KVDict* dict, const char* key, const char* value);
 
 

@@ -10,6 +10,8 @@ int main(int argc, char** argv) {
   KVSetKeyValue(dict, "H", "Hello");
   KVSetKeyValue(dict, "W", "World");
 
+  KVSetKeyValue(dict, "overideing", "message1");
+  KVSetKeyValue(dict, "overideing", "overitten key");
 
   KVSetKeyValue(dict, "a", "ABCDEFGHIJKLMNOPQRSTUVWXUZ");
   KVSetKeyValue(dict, "b", "BCDEFGHIJKLMNOPQRSTUVWXUZ");
@@ -19,6 +21,9 @@ int main(int argc, char** argv) {
   KVSetKeyValue(dict, "f", "FGHIJKLMNOPQRSTUVWXUZ");
 
   KVPrintDict(dict, stdout);
+
+  char* foo = KVValueForKey(dict, "H");
+  printf("value for H: %s\n", foo);
 
   KVDestroy(dict);
 
