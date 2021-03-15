@@ -1,4 +1,5 @@
 *.o
+*.swp
 /a.out
 /test
 /test.kv

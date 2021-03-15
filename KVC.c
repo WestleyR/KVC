@@ -21,15 +21,13 @@ struct KVDictSlice {
 struct KVDict {
   KVDictSlice** slice;
   unsigned int len;
-  unsigned int* populated;
 };
 
 KVDict* KVCreate() {
 	KVDict* dict = (KVDict*) malloc(sizeof(KVDict));
 
-	dict->slice = (KVDictSlice**) malloc(sizeof(KVDictSlice*));
+	dict->slice = (KVDictSlice**) malloc(sizeof(KVDictSlice*) * 300);
 	dict->len = 0;
-  dict->populated = (unsigned int*) malloc(sizeof(unsigned int));
 
 	return dict;
 }
@@ -38,13 +36,13 @@ int KVDestroy(KVDict* dict) {
   if (dict == NULL) return -1;
 
   for (int i = 0; i < dict->len; i++) {
-    free(dict->slice[i]->key);
-    free(dict->slice[i]->value);
+    // TODO: need to free this
+//    free(dict->slice[i]->key);
+//    free(dict->slice[i]->value);
     free(dict->slice[i]);
   }
 
   free(dict->slice);
-  free(dict->populated);
   dict->len = 0;
   free(dict);
 
@@ -131,23 +129,31 @@ int KVSetKeyValue(KVDict* dict, const char* key, const char* value) {
 
     printf("HASH: %llu\n", index);
 
-    if (dict->len >= index) {
+    if (dict->len > index) {
       if ((dict->slice[index]->key != NULL) && (strcmp(dict->slice[index]->key, key) == 0)) {
         // the key already exists
         br = 1;
         break;
       } else {
         // Empty spot for it
+        dict->slice[index]->key = (char*) malloc(sizeof(char) * strlen(key) + 2);
+        dict->slice[index]->value = (char*) malloc(sizeof(char) * strlen(value) + 2);
+        
+        strcpy(dict->slice[index]->key, key);
+        strcpy(dict->slice[index]->value, value);
+ 
         br = 1;
         break;
       }
     } else {
       // the key does not exist yet
       if (index > dict->len) {
-        dict->slice = (KVDictSlice**) realloc(dict->slice, sizeof(KVDictSlice*) * index + 1);
+//        dict->slice = (KVDictSlice**) realloc(dict->slice, sizeof(KVDictSlice*) * index + 1);
         while (dict->len < index) {
-         dict->slice[dict->len] = (KVDictSlice*) malloc(sizeof(KVDictSlice));
-         dict->len++;
+          printf("Mallocing: %d\n", dict->len);
+          dict->slice[dict->len] = (KVDictSlice*) malloc(sizeof(KVDictSlice) * 2);
+
+          dict->len++;
         }
       }
   
@@ -167,6 +173,7 @@ int KVSetKeyValue(KVDict* dict, const char* key, const char* value) {
   }
 
   free(hashArr);
+  printf("DICT_LEN: %d\n", dict->len);
 
 
 //  if (keyIndex > dict->len) {
@@ -192,7 +199,7 @@ int KVPrintDict(KVDict* dict, FILE* stream) {
   if (dict == NULL) return -1;
 
   fprintf(stream, "{\n");
-  for (int i = 0; i < dict->len; i++) {
+  for (int i = 1; i < dict->len; i++) {
     if (dict->slice[i] == NULL) continue;
     if (dict->slice[i]->key == NULL) continue;
     fprintf(stream, "  %s->%s (at index: %u)\n", dict->slice[i]->key, dict->slice[i]->value, i);
