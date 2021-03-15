@@ -47,7 +47,7 @@ int KVDestroy(KVDict* dict) {
   return 0;
 }
 
-int KVAddKeyValue(KVDict* dict, const char* key, const char* value) {
+int KVSetKeyValue(KVDict* dict, const char* key, const char* value) {
   if (dict == NULL) return -1;
 
 	dict->slice = (KVDictSlice**) realloc(dict->slice, sizeof(KVDictSlice*) * dict->len + 1);

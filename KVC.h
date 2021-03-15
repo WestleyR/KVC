@@ -21,11 +21,15 @@
 typedef struct KVDictSlice KVDictSlice;
 typedef struct KVDict KVDict;
 
+// Creation/cleanups
 KVDict* KVCreate();
 int KVDestroy(KVDict* dict);
 
-int KVAddKeyValue(KVDict* dict, const char* key, const char* value);
+// Adding
+int KVSetKeyValue(KVDict* dict, const char* key, const char* value);
 
+
+// Printing
 int KVPrintDict(KVDict* dict, FILE* stream);
 
 #endif // KV_DICT_H__

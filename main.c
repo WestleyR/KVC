@@ -6,17 +6,17 @@ int main(int argc, char** argv) {
 
   KVDict* dict = KVCreate();
 
-  KVAddKeyValue(dict, "HELLO", "WORLD");
-  KVAddKeyValue(dict, "H", "Hello");
-  KVAddKeyValue(dict, "W", "World");
+  KVSetKeyValue(dict, "HELLO", "WORLD");
+  KVSetKeyValue(dict, "H", "Hello");
+  KVSetKeyValue(dict, "W", "World");
 
 
-  KVAddKeyValue(dict, "a", "ABCDEFGHIJKLMNOPQRSTUVWXUZ");
-  KVAddKeyValue(dict, "b", "BCDEFGHIJKLMNOPQRSTUVWXUZ");
-  KVAddKeyValue(dict, "c", "CDEFGHIJKLMNOPQRSTUVWXUZ");
-  KVAddKeyValue(dict, "d", "DEFGHIJKLMNOPQRSTUVWXUZ");
-  KVAddKeyValue(dict, "e", "EFGHIJKLMNOPQRSTUVWXUZ");
-  KVAddKeyValue(dict, "f", "FGHIJKLMNOPQRSTUVWXUZ");
+  KVSetKeyValue(dict, "a", "ABCDEFGHIJKLMNOPQRSTUVWXUZ");
+  KVSetKeyValue(dict, "b", "BCDEFGHIJKLMNOPQRSTUVWXUZ");
+  KVSetKeyValue(dict, "c", "CDEFGHIJKLMNOPQRSTUVWXUZ");
+  KVSetKeyValue(dict, "d", "DEFGHIJKLMNOPQRSTUVWXUZ");
+  KVSetKeyValue(dict, "e", "EFGHIJKLMNOPQRSTUVWXUZ");
+  KVSetKeyValue(dict, "f", "FGHIJKLMNOPQRSTUVWXUZ");
 
   KVPrintDict(dict, stdout);
 
