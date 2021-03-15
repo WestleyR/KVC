@@ -108,11 +108,69 @@ int KVPrintDict(KVDict* dict, FILE* stream) {
   return 0;
 }
 
+void addCharToCharArr(char* arr, char c) {
+  int len = strlen(arr);
+  arr[len] = c;
+  arr[len+1] = '\0';
+}
 
 KVDict* KVReadFromFile(FILE* fp) {
   KVDict* dict = KVCreate();
 
+  fseek(fp, 0, SEEK_END);
+  int size = ftell(fp);
+  fseek(fp, 0, SEEK_SET);
+  char* data = (char*) malloc(size + 1);
+  fread(data, 1, size, fp);
+  data[size] = '\0';
+  fclose(fp);
 
+  char* ptr = data;
+
+  char key[1024];
+  key[0] = '\0';
+  char value[1024];
+  value[0] = '\0';
+
+  while (*ptr) {
+    if (*ptr == '<') {
+      // Begin key
+      ptr++;
+      if (*ptr != '"') {
+        // Not a key
+      } else {
+        ptr++;
+        while (*ptr != '"') {
+          addCharToCharArr(key, *ptr);
+          ptr++;
+        }
+        //printf("KEY: %s\n", key);
+      }
+      // Now check for the value
+      ptr++;
+      if (*ptr == ',') {
+        ptr++;
+        if (*ptr == '"') {
+          ptr++;
+          while (*ptr != '"') {
+            addCharToCharArr(value, *ptr);
+            ptr++;
+          }
+          //printf("VALUE: %s\n", value);
+          KVSetKeyValue(dict, key, value);
+          key[0] = '\0';
+          value[0] = '\0';
+        }
+      }
+    }
+
+    if (*ptr == '>') {
+      // End key
+    }
+    ptr++;
+  }
+
+  free(data);
 
   return dict;
 }
@@ -124,7 +182,7 @@ int KVWriteToFile(KVDict* dict, FILE* fp) {
   fprintf(fp, "<dict_begin>\n");
 
   for (int i = 0; i < dict->len; i++) {
-    fprintf(fp, "\"%s\",\"%s\"\n", dict->slice[i]->key, dict->slice[i]->value);
+    fprintf(fp, "<\"%s\",\"%s\">\n", dict->slice[i]->key, dict->slice[i]->value);
   }
 
   fprintf(fp, "</dict_begin>\n");

@@ -31,6 +31,13 @@ int main(int argc, char** argv) {
 
   KVDestroy(dict);
 
+  fp = fopen("file.kv", "rb");
+  KVDict* bar = KVReadFromFile(fp);
+  fclose(fp);
+
+  KVPrintDict(bar, stdout);
+  KVDestroy(bar);
+
   return 0;
 }
 
