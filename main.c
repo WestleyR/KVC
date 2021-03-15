@@ -10,15 +10,11 @@ int main(int argc, char** argv) {
   KVSetKeyValue(dict, "h", "hello");
   KVSetKeyValue(dict, "w", "world");
 
-//  for (int i = 0; i < 300000; i++) {
-//    char foo[20];
-//    sprintf(foo, "KEY_%u", i);
-//    if (i == 299999) {
-//      KVSetKeyValue(dict, foo, "Can you see me?");
-//    } else {
-//      KVSetKeyValue(dict, foo, "hello-world");
-//    }
-//  }
+  for (int i = 0; i < 20; i++) {
+    char foo[20];
+    sprintf(foo, "KEY_%u", i);
+    KVSetKeyValue(dict, foo, "hello-world");
+  }
 
 //  KVSetKeyValue(dict, "H", "Hello");
 //  KVSetKeyValue(dict, "W", "World");
