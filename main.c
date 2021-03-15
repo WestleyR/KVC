@@ -8,6 +8,7 @@ int main(int argc, char** argv) {
 
   KVSetKeyValue(dict, "HELLO", "WORLD");
   KVSetKeyValue(dict, "h", "hello");
+  KVSetKeyValue(dict, "w", "world");
 
 //  for (int i = 0; i < 300000; i++) {
 //    char foo[20];
