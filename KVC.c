@@ -108,5 +108,29 @@ int KVPrintDict(KVDict* dict, FILE* stream) {
   return 0;
 }
 
+
+KVDict* KVReadFromFile(FILE* fp) {
+  KVDict* dict = KVCreate();
+
+
+
+  return dict;
+}
+
+int KVWriteToFile(KVDict* dict, FILE* fp) {
+  if (dict == NULL) return -1;
+
+  fprintf(fp, "<dict_version>0.1.0</dict_version>\n");
+  fprintf(fp, "<dict_begin>\n");
+
+  for (int i = 0; i < dict->len; i++) {
+    fprintf(fp, "\"%s\",\"%s\"\n", dict->slice[i]->key, dict->slice[i]->value);
+  }
+
+  fprintf(fp, "</dict_begin>\n");
+
+  return 0;
+}
+
 // vim: tabstop=2 shiftwidth=2 expandtab autoindent softtabstop=0
 

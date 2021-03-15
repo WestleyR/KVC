@@ -27,8 +27,13 @@ KVDict* KVCreate();
 int KVDestroy(KVDict* dict);
 
 
-// Viewing
+// Getting values
 char* KVValueForKey(KVDict* dict, const char* key);
+
+
+// Reading/writting
+int KVWriteToFile(KVDict* dict, FILE* fp);
+KVDict* KVReadFromFile(FILE* fp);
 
 
 // KVSetKeyValue will set a key string for a value. Will create the

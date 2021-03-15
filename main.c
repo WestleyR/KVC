@@ -25,6 +25,10 @@ int main(int argc, char** argv) {
   char* foo = KVValueForKey(dict, "H");
   printf("value for H: %s\n", foo);
 
+  FILE* fp = fopen("file.kv", "wb");
+  KVWriteToFile(dict, fp);
+  fclose(fp);
+
   KVDestroy(dict);
 
   return 0;
