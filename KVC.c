@@ -21,6 +21,7 @@ struct KVDictSlice {
 struct KVDict {
   KVDictSlice** slice;
   unsigned int len;
+  unsigned int* populated;
 };
 
 KVDict* KVCreate() {
@@ -28,6 +29,7 @@ KVDict* KVCreate() {
 
 	dict->slice = (KVDictSlice**) malloc(sizeof(KVDictSlice*));
 	dict->len = 0;
+  dict->populated = (unsigned int*) malloc(sizeof(unsigned int));
 
 	return dict;
 }
@@ -42,6 +44,7 @@ int KVDestroy(KVDict* dict) {
   }
 
   free(dict->slice);
+  free(dict->populated);
   dict->len = 0;
   free(dict);
 
@@ -60,38 +63,127 @@ int indexForKey(KVDict* dict, const char* key) {
   return -1;
 }
 
+unsigned int getIndexForKey(const char* key) {
+  unsigned int checksum = 0;
+
+  while (*key) {
+    checksum += *key;
+    key++;
+  }
+
+  return checksum;
+}
+
 char* KVValueForKey(KVDict* dict, const char* key) {
   if (dict == NULL) return NULL;
 
-  int index = indexForKey(dict, key);
-  if (index != -1) {
-    // It exists
-    return dict->slice[index]->value;
-  }
 
-  return NULL;
+  unsigned int keyIndex = getIndexForKey(key);
+  if (keyIndex > dict->len) return NULL;
+  return dict->slice[keyIndex]->value;
+
+//  int index = indexForKey(dict, key);
+//  if (index != -1) {
+//    // It exists
+//    return dict->slice[index]->value;
+//  }
+//
+//  return NULL;
+}
+
+void hash_32_to_string(char str[65], uint8_t hash[32]) {
+  for (int i = 0; i < 32; i++) {
+    str += sprintf(str, "%u", hash[i]);
+  }
+}
+
+// returns a 78 digit number in a string, for a key string.
+char* keyStrToHash(const char* key) {
+  uint8_t hash[32];
+
+  calc_sha_256(hash, key, strlen(key));
+
+  char str[65];
+  hash_32_to_string(str, hash);
+
+  char* ret = (char*) malloc(64);
+  strcpy(ret, str);
+
+  return ret;
 }
 
 int KVSetKeyValue(KVDict* dict, const char* key, const char* value) {
   if (dict == NULL) return -1;
 
-  // First, check if the key already exists. If so, just modify it. Otherwise create a new slice.
-  int index = indexForKey(dict, key);
-  if (index != -1) {
-    // Already exists
-    dict->slice[index]->value = realloc(dict->slice[index]->value, strlen(value) + 2);
-    strcpy(dict->slice[index]->value, value);
-  } else {
-    dict->slice = (KVDictSlice**) realloc(dict->slice, sizeof(KVDictSlice*) * dict->len + 1);
-    dict->slice[dict->len] = (KVDictSlice*) malloc(sizeof(KVDictSlice));
-    
-    dict->slice[dict->len]->key = (char*) malloc(sizeof(char) * strlen(key) + 2);
-    dict->slice[dict->len]->value = (char*) malloc(sizeof(char) * strlen(value) + 2);
-    
-    strcpy(dict->slice[dict->len]->key, key);
-    strcpy(dict->slice[dict->len]->value, value);
-    dict->len++;
+  char* hashArr = keyStrToHash(key);
+  printf("HASH: %s\n", hashArr);
+
+  int br = 0;
+
+  // Only go up to 20 digits, otherwise the number gets too big
+  for (int i = 0; i < 20; i++) {
+    unsigned long long index = hashArr[0] - '0';
+
+    for (int v = 1; v < i; v++) {
+      index *= 10;
+      index += hashArr[v] - '0';
+    }
+
+    printf("HASH: %llu\n", index);
+
+    if (dict->len >= index) {
+      if ((dict->slice[index]->key != NULL) && (strcmp(dict->slice[index]->key, key) == 0)) {
+        // the key already exists
+        br = 1;
+        break;
+      } else {
+        // Empty spot for it
+        br = 1;
+        break;
+      }
+    } else {
+      // the key does not exist yet
+      if (index > dict->len) {
+        dict->slice = (KVDictSlice**) realloc(dict->slice, sizeof(KVDictSlice*) * index + 1);
+        while (dict->len < index) {
+         dict->slice[dict->len] = (KVDictSlice*) malloc(sizeof(KVDictSlice));
+         dict->len++;
+        }
+      }
+  
+      dict->slice[dict->len] = (KVDictSlice*) malloc(sizeof(KVDictSlice));
+      
+      dict->slice[dict->len]->key = (char*) malloc(sizeof(char) * strlen(key) + 2);
+      dict->slice[dict->len]->value = (char*) malloc(sizeof(char) * strlen(value) + 2);
+      
+      strcpy(dict->slice[dict->len]->key, key);
+      strcpy(dict->slice[dict->len]->value, value);
+      dict->len++;
+      br = 1;
+    }
+
+    if (br == 1) break;
+
   }
+
+  free(hashArr);
+
+
+//  if (keyIndex > dict->len) {
+//    dict->slice = (KVDictSlice**) realloc(dict->slice, sizeof(KVDictSlice*) * keyIndex + 1);
+//    while (dict->len < keyIndex) {
+//     dict->slice[dict->len] = (KVDictSlice*) malloc(sizeof(KVDictSlice));
+//     dict->len++;
+//    }
+//  }
+//  dict->slice[dict->len] = (KVDictSlice*) malloc(sizeof(KVDictSlice));
+//  
+//  dict->slice[dict->len]->key = (char*) malloc(sizeof(char) * strlen(key) + 2);
+//  dict->slice[dict->len]->value = (char*) malloc(sizeof(char) * strlen(value) + 2);
+//  
+//  strcpy(dict->slice[dict->len]->key, key);
+//  strcpy(dict->slice[dict->len]->value, value);
+//  dict->len++;
 
   return 0;
 }
@@ -101,7 +193,9 @@ int KVPrintDict(KVDict* dict, FILE* stream) {
 
   fprintf(stream, "{\n");
   for (int i = 0; i < dict->len; i++) {
-    fprintf(stream, "  %s->%s\n", dict->slice[i]->key, dict->slice[i]->value);
+    if (dict->slice[i] == NULL) continue;
+    if (dict->slice[i]->key == NULL) continue;
+    fprintf(stream, "  %s->%s (at index: %u)\n", dict->slice[i]->key, dict->slice[i]->value, i);
   }
   fprintf(stream, "}\n");
 

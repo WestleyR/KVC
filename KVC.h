@@ -17,6 +17,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdint.h>
+
+#include "sha-256.h"
 
 typedef struct KVDictSlice KVDictSlice;
 typedef struct KVDict KVDict;
