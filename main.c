@@ -10,10 +10,14 @@ int main(int argc, char** argv) {
   KVSetKeyValue(dict, "h", "hello");
   KVSetKeyValue(dict, "w", "world");
 
-  for (int i = 0; i < 20; i++) {
+  for (int i = 0; i < 21; i++) {
     char foo[20];
     sprintf(foo, "KEY_%u", i);
-    KVSetKeyValue(dict, foo, "hello-world");
+    if (i == 20) {
+      KVSetKeyValue(dict, foo, "Can you see me?");
+    } else {
+      KVSetKeyValue(dict, foo, "hello-world");
+    }
   }
 
 //  KVSetKeyValue(dict, "H", "Hello");
@@ -33,7 +37,7 @@ int main(int argc, char** argv) {
   KVPrintDict(dict, stdout);
 
   // Print a key at the end of the "array" (which is a hashtable)
-  char* last_value = KVValueForKey(dict, "KEY_299999");
+  char* last_value = KVValueForKey(dict, "KEY_20");
   printf("value for end-of-array: %s\n", last_value);
 
 //  char* foo = KVValueForKey(dict, "H");

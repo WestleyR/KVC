@@ -65,26 +65,6 @@ int indexForKey(KVDict* dict, const char* key) {
   return -1;
 }
 
-unsigned int getIndexForKey(const char* key) {
-  unsigned int checksum = 0;
-
-  while (*key) {
-    checksum += *key;
-    key++;
-  }
-
-  return checksum;
-}
-
-char* KVValueForKey(KVDict* dict, const char* key) {
-  if (dict == NULL) return NULL;
-
-
-  unsigned int keyIndex = getIndexForKey(key);
-  if (keyIndex > dict->len) return NULL;
-  return dict->slice[keyIndex]->value;
-}
-
 void hash_32_to_string(char str[65], uint8_t hash[32]) {
   for (int i = 0; i < 32; i++) {
     str += sprintf(str, "%u", hash[i]);
@@ -104,6 +84,40 @@ char* keyStrToHash(const char* key) {
   strcpy(ret, str);
 
   return ret;
+}
+
+char* KVValueForKey(KVDict* dict, const char* key) {
+  if (dict == NULL) return NULL;
+
+  char* hashArr = keyStrToHash(key);
+
+  // Only go up to 20 digits, otherwise the number gets too big
+  for (int i = 0; i < 20; i++) {
+    unsigned long long index = hashArr[0] - '0';
+
+    for (int v = 1; v < i; v++) {
+      index *= 10;
+      index += hashArr[v] - '0';
+    }
+
+    printf("Searching at index: %llu\n", index);
+
+    if (index > dict->len) {
+      printf("Key: %s not found\n", key);
+      return NULL;
+    }
+
+    if (dict->slice[index] != NULL) {
+      if (dict->slice[index]->key != NULL) {
+        if (strcmp(dict->slice[index]->key, key) == 0) {
+          printf("Found %s at index %llu\n\n", dict->slice[index]->key, index);
+          return dict->slice[index]->value;
+        }
+      }
+    }
+  }
+
+  return NULL;
 }
 
 int KVSetKeyValue(KVDict* dict, const char* key, const char* value) {
