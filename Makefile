@@ -18,7 +18,7 @@ PREFIX = $(HOME)/.local
 CC = gcc
 
 # These flags can be changed though the command line
-CFLAGS = -Wall
+CFLAGS = -Wall -g
 
 TARGET = test
 

@@ -20,34 +20,11 @@ int main(int argc, char** argv) {
     }
   }
 
-//  KVSetKeyValue(dict, "H", "Hello");
-//  KVSetKeyValue(dict, "W", "World");
-//
-//  KVSetKeyValue(dict, "overideing", "message1");
-//  KVSetKeyValue(dict, "overideing", "overitten key");
-//
-//  KVSetKeyValue(dict, "a", "ABCDEFGHIJKLMNOPQRSTUVWXUZ");
-//  KVSetKeyValue(dict, "b", "BCDEFGHIJKLMNOPQRSTUVWXUZ");
-//  KVSetKeyValue(dict, "c", "CDEFGHIJKLMNOPQRSTUVWXUZ");
-//  KVSetKeyValue(dict, "d", "DEFGHIJKLMNOPQRSTUVWXUZ");
-//  KVSetKeyValue(dict, "e", "EFGHIJKLMNOPQRSTUVWXUZ");
-//  KVSetKeyValue(dict, "f", "FGHIJKLMNOPQRSTUVWXUZ");
-
-//  printf("Entire dict: ");
   KVPrintDict(dict, stdout);
 
   // Print a key at the end of the "array" (which is a hashtable)
-  char* last_value = KVValueForKey(dict, "KEY_20");
-  printf("value for end-of-array: %s\n", last_value);
-
-//  char* foo = KVValueForKey(dict, "H");
-//  printf("value for H: %s\n", foo);
-//  
-//  printf("\nWritting the dict to file: test.kv...\n\n");
-//
-//  FILE* fp = fopen("test.kv", "wb");
-//  KVWriteToFile(dict, fp);
-//  fclose(fp);
+//  char* last_value = KVValueForKey(dict, "KEY_20");
+//  printf("value for end-of-array: %s\n", last_value);
 
   KVDestroy(dict);
 
