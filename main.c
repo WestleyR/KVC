@@ -10,8 +10,8 @@ int main(int argc, char** argv) {
   KVSetKeyValue(dict, "h", "hello");
   KVSetKeyValue(dict, "w", "world");
 
-  for (int i = 0; i < 21; i++) {
-    char foo[20];
+  for (int i = 0; i < 200000; i++) {
+    char foo[200];
     sprintf(foo, "KEY_%u", i);
     if (i == 20) {
       KVSetKeyValue(dict, foo, "Can you see me?");
