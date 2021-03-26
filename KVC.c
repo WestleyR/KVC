@@ -35,10 +35,6 @@ KVDict* KVCreate() {
 int KVDestroy(KVDict* dict) {
   if (dict == NULL) return -1;
 
-  // Right now, need to free the first slice.
-  // The array will never start at 0.
-//  free(dict->slice[0]);
-
   for (int i = 0; i < dict->len; i++) {
     if (dict->slice[i] != NULL) {
       free(dict->slice[i]->key);
@@ -100,27 +96,34 @@ char* KVValueForKey(KVDict* dict, const char* key) {
 
   char* hashArr = keyStrToHash(key);
 
-  // Only go up to 20 digits, otherwise the number gets too big
-  for (int i = 0; i < 20; i++) {
-    unsigned long long index = hashArr[0] - '0';
+  unsigned int indexContinue = 0;
+  int indexI = strlen(hashArr) - 1;
 
-    for (int v = 1; v < i; v++) {
-      index *= 10;
-      index += hashArr[v] - '0';
+  while (true) {
+    unsigned long long index = hashArr[indexI] - '0';
+
+    for (int i = 0; i < indexContinue; i++) {
+      index *= 1.1; // This speeds it up a lot, but also wastes more empty indexs...
+      index += hashArr[indexI] - '0';
+
+      indexI--;
+      if (indexI < 0) indexI = strlen(hashArr)-1;
     }
 
-    printf("Searching at index: %llu\n", index);
+    if (index < dict->len) {
+      // May have an open spot for it (or already exists)
 
-    if (index > dict->len) {
-      printf("Key: %s not found\n", key);
-      return NULL;
-    }
+      if (dict->slice[index] != NULL) {
+        if (dict->slice[index]->key != NULL) {
+          if (strcmp(dict->slice[index]->key, key) == 0) {
+            // Found the key! it already exists in our array
 
-    if (dict->slice[index] != NULL) {
-      if (dict->slice[index]->key != NULL) {
-        if (strcmp(dict->slice[index]->key, key) == 0) {
-          printf("Found %s at index %llu\n\n", dict->slice[index]->key, index);
-          return dict->slice[index]->value;
+            printf("Loopup attemtps: %d\n", indexContinue);
+            return dict->slice[index]->value;
+          } else {
+            // Opps, wrong index!
+            indexContinue++;
+          }
         }
       }
     }
@@ -138,8 +141,6 @@ int KVSetKeyValue(KVDict* dict, const char* key, const char* value) {
 //  printf("HASHARR: %s\n", hashArr);
 
   unsigned int indexContinue = 0;
-
-//  for (int i = strlen(hashArr) - 1; i >= 0; i--) {
 
   int indexI = strlen(hashArr) - 1;
 
@@ -189,14 +190,7 @@ int KVSetKeyValue(KVDict* dict, const char* key, const char* value) {
 
       dict->slice = (KVDictSlice**) realloc(dict->slice, sizeof(KVDictSlice*) * index + (2 * sizeof(KVDictSlice*)));
       while (dict->len < index) {
-//        printf("Mallocing: %d\n", dict->len);
-
         dict->slice[dict->len] = NULL;
-
-//          dict->slice[dict->len] = (KVDictSlice*) malloc(sizeof(KVDictSlice));
-//          dict->slice[dict->len]->key = NULL;
-//          dict->slice[dict->len]->value = NULL;
-
         dict->len++;
       }
   
@@ -213,7 +207,7 @@ int KVSetKeyValue(KVDict* dict, const char* key, const char* value) {
     }
   }
 
-  printf("Max trys: %d\n", indexContinue);
+//  printf("Max trys: %d\n", indexContinue);
 
   free(hashArr);
 

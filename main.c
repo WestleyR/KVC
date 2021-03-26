@@ -1,5 +1,6 @@
 
 #include <stdio.h>
+#include <time.h>
 #include "KVC.h"
 
 int main(int argc, char** argv) {
@@ -10,10 +11,11 @@ int main(int argc, char** argv) {
   KVSetKeyValue(dict, "h", "hello");
   KVSetKeyValue(dict, "w", "world");
 
-  for (int i = 0; i < 100000; i++) {
+  unsigned int loops = 100000;
+  for (int i = 0; i < loops; i++) {
     char foo[200];
     sprintf(foo, "KEY_%u", i);
-    if (i == 350000) {
+    if (i == loops-1) {
       KVSetKeyValue(dict, foo, "Can you see me?");
     } else {
       KVSetKeyValue(dict, foo, "hello-world");
@@ -22,10 +24,21 @@ int main(int argc, char** argv) {
 
   KVPrintDict(dict, stdout);
 
-
   // Print a key at the end of the "array" (which is a hashtable)
-//  char* last_value = KVValueForKey(dict, "KEY_20");
-//  printf("value for end-of-array: %s\n", last_value);
+
+  char lastKey[200];
+  sprintf(lastKey, "KEY_%u", loops-1);
+ 
+  clock_t t;
+  t = clock();
+
+  char* last_value = KVValueForKey(dict, lastKey);
+
+  t = clock() - t;
+  double time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds
+
+  printf("lookup took %f seconds\n", time_taken);
+  printf("value for end-of-array: %s\n", last_value);
 
   KVDestroy(dict);
 
