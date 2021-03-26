@@ -12,3 +12,13 @@ that can be saved to a file, and read back from a file.
 
 KVC is currently in development, please check back later.
 
+## Performance
+
+Currently, for adding key/values, it would be typically be 100 tries per million
+entities. Not exactly the best, but reasonably fast.
+
+Lookup attempts would be similar.
+
+As far as efficiencies, the total array size would be about double of the
+entities. Again, maybe not the words best, but not too bad.
+

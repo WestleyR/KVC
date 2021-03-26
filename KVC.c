@@ -37,9 +37,9 @@ int KVDestroy(KVDict* dict) {
 
   // Right now, need to free the first slice.
   // The array will never start at 0.
-  free(dict->slice[0]);
+//  free(dict->slice[0]);
 
-  for (int i = 1; i < dict->len; i++) {
+  for (int i = 0; i < dict->len; i++) {
     if (dict->slice[i] != NULL) {
       free(dict->slice[i]->key);
       free(dict->slice[i]->value);
@@ -148,7 +148,7 @@ int KVSetKeyValue(KVDict* dict, const char* key, const char* value) {
     unsigned long long index = hashArr[indexI] - '0';
 
     for (int i = 0; i < indexContinue; i++) {
-      index *= 1.1;
+      index *= 1.1; // This speeds it up a lot, but also wastes more empty indexs...
       index += hashArr[indexI] - '0';
 
       indexI--;
@@ -213,7 +213,9 @@ int KVSetKeyValue(KVDict* dict, const char* key, const char* value) {
     }
   }
 
-//  printf("Max trys: %d\n", indexContinue);
+  printf("Max trys: %d\n", indexContinue);
+
+  free(hashArr);
 
 
 //  int br = 0;
