@@ -19,6 +19,12 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#ifndef bool
+#define bool unsigned int
+#define true 1
+#define false 0
+#endif
+
 #include "sha-256.h"
 
 typedef struct KVDictSlice KVDictSlice;
