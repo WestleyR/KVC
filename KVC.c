@@ -75,23 +75,22 @@ void hash_32_to_string(char str[65], uint8_t hash[32]) {
 
 // returns a 78 digit number in a string, for a key string.
 char* keyStrToHash(const char* key) {
-//  uint8_t hash[32];
-//
-//  calc_sha_256(hash, key, strlen(key));
-//
-//  char str[256];
-//  hash_32_to_string(str, hash);
+  uint8_t hash[32];
+
+  calc_sha_256(hash, key, strlen(key));
+
+  char str[256];
+  hash_32_to_string(str, hash);
 
 
-  unsigned int hash = 0;
+//  unsigned int hash = 0;
+//  for (int i = 0; i < strlen(key); i++) {
+//    hash += key[i];
+//  }
 
-  for (int i = 0; i < strlen(key); i++) {
-    hash += key[i];
-  }
-
-  char* ret = (char*) malloc(20);
-  //strcpy(ret, str);
-  sprintf(ret, "%u", hash);
+  char* ret = (char*) malloc(strlen(str) + 2);
+  strcpy(ret, str);
+  //sprintf(ret, "%u", hash);
 
   return ret;
 }
@@ -149,13 +148,14 @@ int KVSetKeyValue(KVDict* dict, const char* key, const char* value) {
     unsigned long long index = hashArr[indexI] - '0';
 
     for (int i = 0; i < indexContinue; i++) {
+      index *= 1.1;
       index += hashArr[indexI] - '0';
 
       indexI--;
       if (indexI < 0) indexI = strlen(hashArr)-1;
     }
 
-    printf("HASH: %llu\n", index);
+//    printf("HASH: %llu\n", index);
 
     if (index < dict->len) {
       // May have an open spot for it (or already exists)
@@ -213,7 +213,7 @@ int KVSetKeyValue(KVDict* dict, const char* key, const char* value) {
     }
   }
 
-  printf("\n");
+//  printf("Max trys: %d\n", indexContinue);
 
 
 //  int br = 0;
