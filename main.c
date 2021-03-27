@@ -22,10 +22,9 @@ int main(int argc, char** argv) {
     }
   }
 
-  KVPrintDict(dict, stdout);
+//  KVPrintDict(dict, stdout);
 
   // Print a key at the end of the "array" (which is a hashtable)
-
   char lastKey[200];
   sprintf(lastKey, "KEY_%u", loops-1);
  
@@ -42,25 +41,25 @@ int main(int argc, char** argv) {
   printf("value for end-of-array: (key)%s -> %s\n", lastKey, last_value);
 
   // Write the dict to a file
-  FILE* fp = fopen("test.kv", "wb");
-
-  printf("Writting dict to file: test.kv\n");
-  KVWriteToFile(dict, fp);
-  fclose(fp);
-
+//  FILE* fp = fopen("test.kv", "wb");
+//
+//  printf("Writting dict to file: test.kv\n");
+//  KVWriteToFile(dict, fp);
+//  fclose(fp);
+//
   KVDestroy(dict);
-
-  fp = fopen("test.kv", "rb");
-  
-  printf("Reading dict from: file.kv...\n");
-
-  KVDict* bar = KVReadFromFile(fp);
-  fclose(fp);
-
-  printf("Printing dict from file: ");
-  KVPrintDict(bar, stdout);
-
-  KVDestroy(bar);
+//
+//  fp = fopen("test.kv", "rb");
+//  
+//  printf("Reading dict from: file.kv...\n");
+//
+//  KVDict* bar = KVReadFromFile(fp);
+//  fclose(fp);
+//
+//  printf("Printing dict from file: ");
+//  KVPrintDict(bar, stdout);
+//
+//  KVDestroy(bar);
 
   return 0;
 }

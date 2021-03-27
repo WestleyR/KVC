@@ -197,7 +197,7 @@ int KVSetKeyValue(KVDict* dict, const char* key, const char* value) {
         dict->len++;
       }
   
-      //printf("Mallocing -> %d\n", dict->len);
+      printf("Mallocing -> %d\n", dict->len);
       dict->slice[dict->len] = (KVDictSlice*) malloc(sizeof(KVDictSlice));
       
       dict->slice[dict->len]->key = (char*) malloc(sizeof(char) * strlen(key) + 2);
