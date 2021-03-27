@@ -27,9 +27,12 @@
 
 #include "sha-256.h"
 
+// The higher the value, the faster the adding/lookup. But the bigger the array.
+// Cannot be less then 1.
+const static float hashMultiplier = 1.1;
+
 typedef struct KVDictSlice KVDictSlice;
 typedef struct KVDict KVDict;
-
 
 // Creation/cleanups
 KVDict* KVCreate();

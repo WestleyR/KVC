@@ -103,7 +103,7 @@ char* KVValueForKey(KVDict* dict, const char* key) {
     unsigned long long index = hashArr[indexI] - '0';
 
     for (int i = 0; i < indexContinue; i++) {
-      index *= 1.1; // This speeds it up a lot, but also wastes more empty indexs...
+      index *= hashMultiplier;
       index += hashArr[indexI] - '0';
 
       indexI--;
@@ -120,13 +120,14 @@ char* KVValueForKey(KVDict* dict, const char* key) {
 
             printf("Loopup attemtps: %d\n", indexContinue);
             return dict->slice[index]->value;
-          } else {
-            // Opps, wrong index!
-            indexContinue++;
           }
         }
       }
+    } else {
+      printf("Key does not exist\n");
+      return NULL;
     }
+    indexContinue++;
   }
 
   free(hashArr);
@@ -149,7 +150,7 @@ int KVSetKeyValue(KVDict* dict, const char* key, const char* value) {
     unsigned long long index = hashArr[indexI] - '0';
 
     for (int i = 0; i < indexContinue; i++) {
-      index *= 1.1; // This speeds it up a lot, but also wastes more empty indexs...
+      index *= hashMultiplier;
       index += hashArr[indexI] - '0';
 
       indexI--;

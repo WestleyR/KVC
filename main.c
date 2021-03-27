@@ -13,12 +13,12 @@ int main(int argc, char** argv) {
 
   unsigned int loops = 100000;
   for (int i = 0; i < loops; i++) {
-    char foo[200];
-    sprintf(foo, "KEY_%u", i);
+    char key[200];
+    sprintf(key, "KEY_%u", i);
     if (i == loops-1) {
-      KVSetKeyValue(dict, foo, "Can you see me?");
+      KVSetKeyValue(dict, key, "Can you see me?");
     } else {
-      KVSetKeyValue(dict, foo, "hello-world");
+      KVSetKeyValue(dict, key, "hello-world");
     }
   }
 
@@ -29,6 +29,7 @@ int main(int argc, char** argv) {
   char lastKey[200];
   sprintf(lastKey, "KEY_%u", loops-1);
  
+  // Time the lookup speed
   clock_t t;
   t = clock();
 
@@ -38,7 +39,7 @@ int main(int argc, char** argv) {
   double time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds
 
   printf("lookup took %f seconds\n", time_taken);
-  printf("value for end-of-array: %s\n", last_value);
+  printf("value for end-of-array: (key)%s -> %s\n", lastKey, last_value);
 
   KVDestroy(dict);
 
