@@ -197,7 +197,7 @@ int KVSetKeyValue(KVDict* dict, const char* key, const char* value) {
         dict->len++;
       }
   
-      printf("Mallocing -> %d\n", dict->len);
+      //printf("Mallocing -> %d\n", dict->len);
       dict->slice[dict->len] = (KVDictSlice*) malloc(sizeof(KVDictSlice));
       
       dict->slice[dict->len]->key = (char*) malloc(sizeof(char) * strlen(key) + 2);
@@ -277,7 +277,7 @@ KVDict* KVReadFromFile(FILE* fp) {
             addCharToCharArr(value, *ptr);
             ptr++;
           }
-          //printf("VALUE: %s\n", value);
+          //printf("VALUE: %s -> %s\n", value, key);
           KVSetKeyValue(dict, key, value);
           key[0] = '\0';
           value[0] = '\0';
@@ -302,8 +302,12 @@ int KVWriteToFile(KVDict* dict, FILE* fp) {
   fprintf(fp, "<dict_version>0.1.0</dict_version>\n");
   fprintf(fp, "<dict_begin>\n");
 
-  for (int i = 0; i < dict->len; i++) {
-    fprintf(fp, "<\"%s\",\"%s\">\n", dict->slice[i]->key, dict->slice[i]->value);
+  for (unsigned long long i = 0; i < dict->len; i++) {
+    if (dict->slice[i] != NULL) {
+      if (dict->slice[i]->key != NULL) {
+        fprintf(fp, "<\"%s\",\"%s\">\n", dict->slice[i]->key, dict->slice[i]->value);
+      }
+    }
   }
 
   fprintf(fp, "</dict_begin>\n");
