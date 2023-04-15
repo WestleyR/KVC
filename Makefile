@@ -10,15 +10,12 @@
 # your rights to distribute this software.
 #
 
-# The prefix to install the gpack command. This should
-# not be changed, unless you know what your doing.
-PREFIX = $(HOME)/.local
-
 # The C compiler
 CC = gcc
 
 # These flags can be changed though the command line
 CFLAGS = -Wall -g
+#CFLAGS += -DDEBUG
 
 TARGET = test
 
@@ -39,5 +36,4 @@ $(TARGET): $(OBJS)
 
 .PHONY:
 clean:
-	rm -f $(OBJS)
-
+	rm -f $(OBJS) $(TARGET)

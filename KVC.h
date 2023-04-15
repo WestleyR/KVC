@@ -14,49 +14,44 @@
 #ifndef KV_DICT_H__
 #define KV_DICT_H__
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdint.h>
-
-#ifndef bool
-#define bool unsigned int
-#define true 1
-#define false 0
-#endif
-
-#include "sha-256.h"
+#include <stdio.h>  // For printf, sprintf, fprintf and FILE
+#include <stdlib.h> // For malloc/free
+#include <string.h> // For strlen and strcmp
+//#include <stdint.h>
 
 // The higher the value, the faster the adding/lookup. But the bigger the array.
-// Cannot be less then 1.
-const static float hashMultiplier = 1.1;
+// Cannot be <= 1. Recommend: More efficient (but slow) = 1.2, very fast = 2.2.
+static const float hashMultiplier = 1.3;
 
 typedef struct KVDictSlice KVDictSlice;
 typedef struct KVDict KVDict;
 
-// Creation/cleanups
+// KVCreate will alloc a new emtpy KVDict.
 KVDict* KVCreate();
+
+// KVDestroy will dealloc and free the whole KVDict. After dealloc you should
+// not use the dict for anything until its re-created.
 int KVDestroy(KVDict* dict);
 
+// KVLen returns the number of entries in the dict.
+unsigned int KVLen(KVDict* dict);
 
-// Getting values
+// KVValueForKey returns a pointer to the value for the given key. Returned
+// pointer should not be freed.
 char* KVValueForKey(KVDict* dict, const char* key);
 
-
-// Reading/writting
+// KVWriteToFile will write a KVDict to a file pointer (could also be stdout).
 int KVWriteToFile(KVDict* dict, FILE* fp);
+
+// KVReadFromFile will alloc a new dict with the contents of *fp.
 KVDict* KVReadFromFile(FILE* fp);
 
-
-// KVSetKeyValue will set a key string for a value. Will create the
-// value if it does not exist.
+// KVSetKeyValue will set a key string for a value.
 int KVSetKeyValue(KVDict* dict, const char* key, const char* value);
 
-
-// Printing
+// KVPrintDict should only be used for debugging.
 int KVPrintDict(KVDict* dict, FILE* stream);
 
 #endif // KV_DICT_H__
 
 // vim: tabstop=2 shiftwidth=2 expandtab autoindent softtabstop=0
-

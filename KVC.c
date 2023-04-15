@@ -13,6 +13,13 @@
 
 #include "KVC.h"
 
+// For debugging
+#ifdef DEBUG
+#define debugf(...) printf(__VA_ARGS__)
+#else
+#define debugf(fmt, ...)
+#endif
+
 struct KVDictSlice {
   char* key;
   char* value;
@@ -21,6 +28,7 @@ struct KVDictSlice {
 struct KVDict {
   KVDictSlice** slice;
   unsigned int len;
+  unsigned int entries;
 };
 
 KVDict* KVCreate() {
@@ -28,14 +36,15 @@ KVDict* KVCreate() {
 
   dict->slice = (KVDictSlice**) malloc(sizeof(KVDictSlice*));
   dict->len = 0;
+  dict->entries = 0;
 
-	return dict;
+  return dict;
 }
 
 int KVDestroy(KVDict* dict) {
   if (dict == NULL) return -1;
 
-  for (int i = 0; i < dict->len; i++) {
+  for (unsigned int i = 0; i < dict->len; i++) {
     if (dict->slice[i] != NULL) {
       free(dict->slice[i]->key);
       free(dict->slice[i]->value);
@@ -45,48 +54,32 @@ int KVDestroy(KVDict* dict) {
 
   free(dict->slice);
   dict->len = 0;
+  dict->entries = 0;
   free(dict);
 
   return 0;
 }
 
-// TODO: use the hashing
-int indexForKey(KVDict* dict, const char* key) {
-  if (dict == NULL) return -1;
-
-  for (int i = 0; i < dict->len; i++) {
-    if (strcmp(dict->slice[i]->key, key) == 0) {
-      return i;
-    }
-  }
-
-  return -1;
+unsigned int KVLen(KVDict* dict) {
+	return dict->entries;
 }
 
-void hash_32_to_string(char str[65], uint8_t hash[32]) {
-  for (int i = 0; i < 32; i++) {
-    str += sprintf(str, "%u", hash[i]);
-  }
-}
-
-// returns a 78 digit number in a string, for a key string.
+// keyStrToHash gets the most (or highest yet) efficent hash for a key. Keep in
+// mind that the hash is iterated in reverse order.
 char* keyStrToHash(const char* key) {
-  uint8_t hash[32];
+  unsigned int hash, i;
+  for (hash = i = 0; i < strlen(key); ++i) {
+      hash += key[i];
+      hash += (hash << 10);
+      hash ^= (hash >> 6);
+  }
 
-  calc_sha_256(hash, key, strlen(key));
+  hash += (hash << 3);
+  hash ^= (hash >> 11);
+  hash += (hash << 15);
 
-  char str[256];
-  hash_32_to_string(str, hash);
-
-
-//  unsigned int hash = 0;
-//  for (int i = 0; i < strlen(key); i++) {
-//    hash += key[i];
-//  }
-
-  char* ret = (char*) malloc(strlen(str) + 2);
-  strcpy(ret, str);
-  //sprintf(ret, "%u", hash);
+  char* ret = (char*) malloc(128);
+  sprintf(ret, "%u", hash);
 
   return ret;
 }
@@ -99,10 +92,10 @@ char* KVValueForKey(KVDict* dict, const char* key) {
   unsigned int indexContinue = 0;
   int indexI = strlen(hashArr) - 1;
 
-  while (true) {
+  while (1) {
     unsigned long long index = hashArr[indexI] - '0';
 
-    for (int i = 0; i < indexContinue; i++) {
+    for (unsigned int i = 0; i < indexContinue; i++) {
       index *= hashMultiplier;
       index += hashArr[indexI] - '0';
 
@@ -118,14 +111,14 @@ char* KVValueForKey(KVDict* dict, const char* key) {
           if (strcmp(dict->slice[index]->key, key) == 0) {
             // Found the key! it already exists in our array
 
-            printf("Loopup attemtps: %d\n", indexContinue);
+            debugf("Lookup attemtps: %d\n", indexContinue + 1);
             free(hashArr);
             return dict->slice[index]->value;
           }
         }
       }
     } else {
-      printf("Key does not exist\n");
+      debugf("Key does not exist\n");
       free(hashArr);
       return NULL;
     }
@@ -141,17 +134,15 @@ int KVSetKeyValue(KVDict* dict, const char* key, const char* value) {
   if (dict == NULL) return -1;
 
   char* hashArr = keyStrToHash(key);
-//  printf("HASHARR: %s\n", hashArr);
+//  debugf("HASHARR: %s for key: %s\n", hashArr, key);
 
   unsigned int indexContinue = 0;
-
   int indexI = strlen(hashArr) - 1;
 
-  while (true) {
-
+  while (1) {
     unsigned long long index = hashArr[indexI] - '0';
 
-    for (int i = 0; i < indexContinue; i++) {
+    for (unsigned int i = 0; i < indexContinue; i++) {
       index *= hashMultiplier;
       index += hashArr[indexI] - '0';
 
@@ -159,7 +150,7 @@ int KVSetKeyValue(KVDict* dict, const char* key, const char* value) {
       if (indexI < 0) indexI = strlen(hashArr)-1;
     }
 
-//    printf("HASH: %llu\n", index);
+//    debugf("HASH: %llu\n", index);
 
     if (index < dict->len) {
       // May have an open spot for it (or already exists)
@@ -170,7 +161,7 @@ int KVSetKeyValue(KVDict* dict, const char* key, const char* value) {
             // Found the key! it already exists in our array
 
             // TODO: fix this
-            printf("Key already exists in our array\n");
+            debugf("Key already exists in our array\n");
             break;
           } else {
             // Opps, that index is already takken. So index the index
@@ -197,7 +188,7 @@ int KVSetKeyValue(KVDict* dict, const char* key, const char* value) {
         dict->len++;
       }
   
-      printf("Mallocing -> %d\n", dict->len);
+      debugf("Mallocing -> %d\n", dict->len);
       dict->slice[dict->len] = (KVDictSlice*) malloc(sizeof(KVDictSlice));
       
       dict->slice[dict->len]->key = (char*) malloc(sizeof(char) * strlen(key) + 2);
@@ -212,6 +203,8 @@ int KVSetKeyValue(KVDict* dict, const char* key, const char* value) {
 
   free(hashArr);
 
+  dict->entries++;
+
   return 0;
 }
 
@@ -219,7 +212,7 @@ int KVPrintDict(KVDict* dict, FILE* stream) {
   if (dict == NULL) return -1;
 
   fprintf(stream, "{\n");
-  for (int i = 1; i < dict->len; i++) {
+  for (unsigned int i = 1; i < dict->len; i++) {
     if (dict->slice[i] == NULL) continue;
     if (dict->slice[i]->key == NULL) continue;
     fprintf(stream, "  %s->%s (at index: %u)\n", dict->slice[i]->key, dict->slice[i]->value, i);
@@ -244,7 +237,6 @@ KVDict* KVReadFromFile(FILE* fp) {
   char* data = (char*) malloc(size + 1);
   fread(data, 1, size, fp);
   data[size] = '\0';
-  fclose(fp);
 
   char* ptr = data;
 
@@ -265,7 +257,7 @@ KVDict* KVReadFromFile(FILE* fp) {
           addCharToCharArr(key, *ptr);
           ptr++;
         }
-        //printf("KEY: %s\n", key);
+        //debugf("KEY: %s\n", key);
       }
       // Now check for the value
       ptr++;
@@ -277,7 +269,7 @@ KVDict* KVReadFromFile(FILE* fp) {
             addCharToCharArr(value, *ptr);
             ptr++;
           }
-          //printf("VALUE: %s -> %s\n", value, key);
+          //debugf("VALUE: %s -> %s\n", value, key);
           KVSetKeyValue(dict, key, value);
           key[0] = '\0';
           value[0] = '\0';
@@ -299,8 +291,8 @@ KVDict* KVReadFromFile(FILE* fp) {
 int KVWriteToFile(KVDict* dict, FILE* fp) {
   if (dict == NULL) return -1;
 
-  fprintf(fp, "<dict_version>0.1.0</dict_version>\n");
-  fprintf(fp, "<dict_begin>\n");
+  fprintf(fp, "<KVC><github.com/WestleyR/KVC><dict_version>0.1.0</dict_version>\n");
+  fprintf(fp, "<dict>\n");
 
   for (unsigned long long i = 0; i < dict->len; i++) {
     if (dict->slice[i] != NULL) {
@@ -310,10 +302,9 @@ int KVWriteToFile(KVDict* dict, FILE* fp) {
     }
   }
 
-  fprintf(fp, "</dict_begin>\n");
+  fprintf(fp, "</dict>\n");
 
   return 0;
 }
 
 // vim: tabstop=2 shiftwidth=2 expandtab autoindent softtabstop=0
-
